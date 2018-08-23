@@ -42,6 +42,9 @@ Plug 'bronson/vim-trailing-whitespace'
 Plug 'easymotion/vim-easymotion'
 Plug 'terryma/vim-multiple-cursors'
 Plug 'Raimondi/delimitMate'
+Plug 'bkad/CamelCaseMotion'
+Plug 'scrooloose/nerdcommenter'
+Plug 'skywind3000/asyncrun.vim'
 
 " List ends here. Plugins become visible to Vim after this call.
 call plug#end()
@@ -77,7 +80,7 @@ nnoremap <silent> <Leader>f :NERDTreeToggle<Enter>
 nnoremap <silent> <Leader>v :NERDTreeFind<CR>
 
 " COMP9242 build
-nnoremap <silent> <Leader>b :!cd ~/aos-2018/build/ && ninja && ../reset.sh<CR>
+nnoremap <silent> <Leader>b :AsyncRun cd ~/aos-2018/build/ && ninja && ../reset.sh<CR>
 
 set cindent
 
@@ -92,3 +95,14 @@ colo dracula
 
 " Show just the file name
 "let g:airline#extensions#tabline#fnamemod = ':t'
+
+" Treat _ as a word boundary
+"set iskeyword-=_
+
+call camelcasemotion#CreateMotionMappings('<leader')
+
+" Jetpack
+nnoremap <Leader>g :ls<CR>:b<space>
+
+" Esc Esc to save file instead of :w
+map <Esc><Esc> :w<CR>
