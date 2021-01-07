@@ -1,4 +1,4 @@
-# My .vimrc configuration
+# My Neovim configuration
 
 ## Main Features
 * vim-plug as the plugin manager
