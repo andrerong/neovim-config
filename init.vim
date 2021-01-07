@@ -1,31 +1,44 @@
+"
 " File: init.vim
 " Author: Andre Rong <andrerong23@gmail.com>
 "
 " My Neovim Configuration
 "
 
+" Reminder: If using this vim configuration for the first time, you'll need to
+" install plug.vim (vim-plug).
+
+
 call plug#begin()
     " ----- Appearance -----
-    Plug 'dracula/vim',{'as':'dracula'}
-    Plug 'altercation/vim-colors-solarized'
-    Plug 'junegunn/seoul256.vim'
+    Plug 'gruvbox-community/gruvbox'
     Plug 'vim-airline/vim-airline'
-    Plug 'neutaaaaan/iosvkem'
     Plug 'vim-airline/vim-airline-themes'
-    Plug 'morhetz/gruvbox'
+    Plug 'andrerong/vim-airline-clock' " My fork to remove leading space
+
+    Plug 'junegunn/rainbow_parentheses.vim'
+    Plug 'Yggdroot/indentLine'
 
     " ----- NERDTree -----
     Plug 'preservim/nerdtree'
     Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
     Plug 'Xuyuanp/nerdtree-git-plugin'
-    Plug 'ryanoasis/vim-devicons'
+    " Plug 'ryanoasis/vim-devicons'
 
     " ----- Usage -----
     Plug 'tpope/vim-sensible'
-    " Plug 'ervandew/supertab'
+    Plug 'ervandew/supertab'
     Plug 'tpope/vim-commentary'
     Plug 'tpope/vim-surround'
-    Plug 'machakann/vim-highlighted-yank'
+    Plug 'kana/vim-textobj-user'
+    Plug 'kana/vim-textobj-entire' " Requires the above
+    Plug 'tommcdo/vim-exchange'
+    Plug 'vim-scripts/argtextobj.vim'
+    Plug 'moll/vim-bbye' " Bdelete (bdelete but keep window)
+    Plug 'preservim/tagbar'
+    Plug 'wellle/targets.vim'
+    Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+    Plug 'junegunn/fzf.vim'
 
     " ----- Git -----
     Plug 'tpope/vim-fugitive'
@@ -33,57 +46,32 @@ call plug#begin()
 
     " ----- Other -----
     Plug 'nathanaelkane/vim-indent-guides'
-    Plug 'vimwiki/vimwiki'
-    Plug 'bronson/vim-trailing-whitespace'
-    Plug 'easymotion/vim-easymotion'
-    Plug 'terryma/vim-multiple-cursors'
+    Plug 'ntpeters/vim-better-whitespace'
     Plug 'Raimondi/delimitMate'
     Plug 'junegunn/goyo.vim'
     Plug 'mattn/calendar-vim'
-
-    " ----- New cool shit-----
-    Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
-    Plug 'junegunn/fzf.vim'
-    Plug 'majutsushi/tagbar'
-    Plug 'vim-scripts/a.vim'
-    Plug 'frazrepo/vim-rainbow'
-
-    Plug 'christoomey/vim-tmux-navigator'
-
-    " Neovim
-    Plug 'neoclide/coc.nvim', {'branch': 'release'}
-    " Plug 'w0rp/ale'
-    Plug 'nanotech/jellybeans.vim'
-    " Plug 'octol/vim-cpp-enhanced-highlight'
-    Plug 'sheerun/vim-polyglot'
-    Plug 'dbgx/lldb.nvim'
-    Plug 'jackguo380/vim-lsp-cxx-highlight'
-    Plug 'srishanbhattarai/neovim-spotify', { 'do': 'bash install.sh' }
     Plug 'jiangmiao/auto-pairs'
-    Plug 'sakhnik/nvim-gdb', { 'do': ':!./install.sh \| UpdateRemotePlugins' }
-    Plug 'puremourning/vimspector'
-    Plug 'cdelledonne/vim-cmake'
+    Plug 'psliwka/vim-smoothie'
+    Plug 'vim-scripts/ReplaceWithRegister'
+    Plug 'antoinemadec/FixCursorHold.nvim' " Not sure if useful
 
-    " ------ Explore -------
-    "  Haven't tried these yet
-    "  exchange.vim
-    "  argtextobj.vim
-    "  vim-textobj-entire
-    "  ReplaceWithRegister
+    " ------ Web ------
+    Plug 'turbio/bracey.vim'
+    Plug 'mattn/emmet-vim'
+    Plug 'pangloss/vim-javascript'
+    Plug 'leafgarland/typescript-vim'
+    Plug 'peitalin/vim-jsx-typescript'
+    Plug 'styled-components/vim-styled-components', { 'branch': 'main' }
+    Plug 'jparise/vim-graphql'
 
 call plug#end()
 
-let g:vimspector_enable_mappings = 'HUMAN'
 
-" Add full file path to your existing statusline
-" Just use Ctrl-G
-" set statusline+=%F
-" set laststatus=2
 
+" ------------------------------------------------------------------------
+" Begin
+" ------------------------------------------------------------------------
 syntax on
-
-" Show line number
-set number relativenumber cursorline
 
 " Turn tabs into spaces
 set expandtab
@@ -92,283 +80,118 @@ set shiftwidth=4
 set softtabstop=0
 set smarttab
 
+set cindent autoindent
+filetype indent off
+
+set nowritebackup noswapfile nobackup
+
+" ------------------------------------------------------------------------
+
+" Space as leader key
+nnoremap <SPACE> <Nop>
+let mapleader=" "
+
+" Show line number
+set number relativenumber cursorline
+
 " Copy/paste system clipboard
 set clipboard+=unnamedplus
 
 
-"set textwidth=79
-
 " NERDTree open and toggle
-nnoremap <silent> <Leader>f :NERDTreeToggle<Enter>
+nnoremap <silent> <Leader>f :NERDTreeToggle<CR>
 nnoremap <silent> <Leader>v :NERDTreeFind<CR>
 
-set cindent autoindent
-filetype indent off
-" inoremap {<CR> {<CR>}<Esc>O<BS><Tab>
+"
+" Move contiguous lines of code up or down
+"
 
-set nowritebackup
-set noswapfile
-set nobackup
-
-" " " Normal mode
-nnoremap <C-j> :m .+1<CR>==
-nnoremap <C-k> :m .-2<CR>==
+" " Normal mode
+nnoremap <silent> <C-j> :m .+1<CR>==
+nnoremap <silent> <C-k> :m .-2<CR>==
 " " Insert mode
-inoremap <C-j> <ESC>:m .+1<CR>==gi
-inoremap <C-k> <ESC>:m .-2<CR>==gi
+inoremap <silent> <C-j> <ESC>:m .+1<CR>==gi
+inoremap <silent> <C-k> <ESC>:m .-2<CR>==gi
 " " Visual mode
-vnoremap <C-j> :m '>+1<CR>gv=gv
-vnoremap <C-k> :m '<-2<CR>gv=gv
+vnoremap <silent> <C-j> :m '>+1<CR>gv=gv
+vnoremap <silent> <C-k> :m '<-2<CR>gv=gv
 
-" background colour
-":highlight Normal ctermfg=grey ctermbg=black
-
-" Enable the list of buffers
-"let g:airline#extensions#tabline#enabled = 1
-
-" Show just the file name
-"let g:airline#extensions#tabline#fnamemod = ':t'
-"
-"
-" set background=dark
-"let g:solarized_visibility = "high"
-"let g:solarized_contrast = "high"
-"let g:solarized_termcolors = 256
-"colo solarized
-let g:dracula_italic = 0
 colo gruvbox
 
-iabbrev date- <c-r>=strftime("%Y/%m/%d %H:%M:%S")<cr>
-
-set t_Co=256
-" colorscheme sucks, you can't get the blue due to its palette not matching a
-" normal terminals color palette
-" let g:solarized_termcolors=256
-"
+iabbrev date- <C-r>=strftime("%Y/%m/%d %H:%M:%S")<CR>
 
 " nnoremap <C-J> <C-W><C-J>
 " nnoremap <C-K> <C-W><C-K>
 " nnoremap <C-L> <C-W><C-L>
 " nnoremap <C-H> <C-W><C-H>
 
-" set splitbelow
-" set splitright
-
-
 set mouse=a
-set splitright
-set splitbelow
+set splitright splitbelow
 
-nnoremap <D-J> :echo "test"
+" Compilation command
+" nnoremap <leader>c :!co %:r<CR>
+" nnoremap <leader>r :!run %:r<CR>
+" nnoremap <leader>r :!co %:r && ./%:r && rm %:r;<CR>
 
-" Coc
+" Terminal Escape to Normal Mode
+tnoremap <Esc> <C-\><C-n>
+nnoremap <silent> <Leader>t :15sp \| te<CR>i
 
-" if hidden is not set, TextEdit might fail.
+" Allows you to leave buffers unsaved when you go to a different buffer
 set hidden
+nnoremap gb :ls<CR>:b<Space>
 
-" Some servers have issues with backup files, see #649
-set nobackup
-set nowritebackup
+" Disable Ex Mode: The key that gets hit by accident
+nnoremap Q <Nop>
 
-" Better display for messages
-set cmdheight=2
+" No word wrap
+set nowrap
 
-" You will have bad experience for diagnostic messages when it's default 4000.
-set updatetime=300
+" Get rid of highlighting after a search
+nnoremap <silent> <CR> :noh<CR>
 
-" don't give |ins-completion-menu| messages.
-set shortmess+=c
-
-" always show signcolumns
-set signcolumn=yes
-
-" Use tab for trigger completion with characters ahead and navigate.
-" Use command ':verbose imap <tab>' to make sure tab is not mapped by other plugin.
-inoremap <silent><expr> <TAB>
-      \ pumvisible() ? "\<C-n>" :
-      \ <SID>check_back_space() ? "\<TAB>" :
-      \ coc#refresh()
-inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
-
-function! s:check_back_space() abort
-  let col = col('.') - 1
-  return !col || getline('.')[col - 1]  =~# '\s'
-endfunction
-
-" Use <c-space> to trigger completion.
-inoremap <silent><expr> <c-space> coc#refresh()
-
-" Use <cr> to confirm completion, `<C-g>u` means break undo chain at current position.
-" Coc only does snippet and additional edit on confirm.
-inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
-
-" Use `[c` and `]c` to navigate diagnostics
-nmap <silent> [c <Plug>(coc-diagnostic-prev)
-nmap <silent> ]c <Plug>(coc-diagnostic-next)
-
-" Remap keys for gotos
-nmap <silent> gd <Plug>(coc-definition)
-nmap <silent> gy <Plug>(coc-type-definition)
-nmap <silent> gi <Plug>(coc-implementation)
-nmap <silent> gr <Plug>(coc-references)
-
-" Use K to show documentation in preview window
-nnoremap <silent> K :call <SID>show_documentation()<CR>
-
-function! s:show_documentation()
-  if (index(['vim','help'], &filetype) >= 0)
-    execute 'h '.expand('<cword>')
-  else
-    call CocAction('doHover')
-  endif
-endfunction
-
-" Highlight symbol under cursor on CursorHold
-autocmd CursorHold * silent call CocActionAsync('highlight')
-
-" Remap for rename current word
-nmap <leader>rn <Plug>(coc-rename)
-
-" Remap for format selected region
-xmap <leader>f  <Plug>(coc-format-selected)
-nmap <leader>f  <Plug>(coc-format-selected)
-
-augroup mygroup
-  autocmd!
-  " Setup formatexpr specified filetype(s).
-  autocmd FileType typescript,json setl formatexpr=CocAction('formatSelected')
-  " Update signature help on jump placeholder
-  autocmd User CocJumpPlaceholder call CocActionAsync('showSignatureHelp')
+" Go to insert mode when clicking on terminal window
+augroup terminal_setup | au!
+    autocmd TermOpen * nnoremap <buffer><LeftRelease> <LeftRelease>i
 augroup end
 
-" Remap for do codeAction of selected region, ex: `<leader>aap` for current paragraph
-xmap <leader>a  <Plug>(coc-codeaction-selected)
-nmap <leader>a  <Plug>(coc-codeaction-selected)
+" Insert mode on entering a window in terminal mode
+autocmd BufWinEnter,WinEnter term://* startinsert
 
-" Remap for do codeAction of current line
-nmap <leader>ac  <Plug>(coc-codeaction)
-" Fix autofix problem of current line
-nmap <leader>qf  <Plug>(coc-fix-current)
-
-" Use <tab> for select selections ranges, needs server support, like: coc-tsserver, coc-python
-nmap <silent> <TAB> <Plug>(coc-range-select)
-xmap <silent> <TAB> <Plug>(coc-range-select)
-xmap <silent> <S-TAB> <Plug>(coc-range-select-backword)
-
-" Use `:Format` to format current buffer
-command! -nargs=0 Format :call CocAction('format')
-
-" Use `:Fold` to fold current buffer
-command! -nargs=? Fold :call     CocAction('fold', <f-args>)
-
-" use `:OR` for organize import of current buffer
-command! -nargs=0 OR   :call     CocAction('runCommand', 'editor.action.organizeImport')
-
-" Add status line support, for integration with other plugin, checkout `:h coc-status`
-set statusline^=%{coc#status()}%{get(b:,'coc_current_function','')}
-
-" Using CocList
-" Show all diagnostics
-nnoremap <silent> <space>a  :<C-u>CocList diagnostics<cr>
-" Manage extensions
-nnoremap <silent> <space>e  :<C-u>CocList extensions<cr>
-" Show commands
-nnoremap <silent> <space>c  :<C-u>CocList commands<cr>
-" Find symbol of current document
-nnoremap <silent> <space>o  :<C-u>CocList outline<cr>
-" Search workspace symbols
-nnoremap <silent> <space>s  :<C-u>CocList -I symbols<cr>
-" Do default action for next item.
-nnoremap <silent> <space>j  :<C-u>CocNext<CR>
-" Do default action for previous item.
-nnoremap <silent> <space>k  :<C-u>CocPrev<CR>
-" Resume latest coc list
-nnoremap <silent> <space>p  :<C-u>CocListResume<CR>
-
-
-" NERDTree
-let g:NERDTreeShowHidden = 1 
-let g:NERDTreeMinimalUI = 1 " hide helper
-let g:NERDTreeIgnore = ['^node_modules$'] " ignore node_modules to increase load speed 
-let g:NERDTreeStatusline = '' " set to empty to use lightline
-" " Toggle
-noremap <silent> <C-b> :NERDTreeToggle<CR>
-" " Close window if NERDTree is the last one
-autocmd BufEnter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
-" " Map to open current file in NERDTree and set size
-nnoremap <leader>pv :NERDTreeFind<bar> :vertical resize 45<CR>
-
-" NERDTree Syntax Highlight
-" " Enables folder icon highlighting using exact match
-let g:NERDTreeHighlightFolders = 1 
-" " Highlights the folder name
-let g:NERDTreeHighlightFoldersFullName = 1 
-" " Color customization
-let s:brown = "905532"
-let s:aqua =  "3AFFDB"
-let s:blue = "689FB6"
-let s:darkBlue = "44788E"
-let s:purple = "834F79"
-let s:lightPurple = "834F79"
-let s:red = "AE403F"
-let s:beige = "F5C06F"
-let s:yellow = "F09F17"
-let s:orange = "D4843E"
-let s:darkOrange = "F16529"
-let s:pink = "CB6F6F"
-let s:salmon = "EE6E73"
-let s:green = "8FAA54"
-let s:lightGreen = "31B53E"
-let s:white = "FFFFFF"
-let s:rspec_red = 'FE405F'
-let s:git_orange = 'F54D27'
-" " This line is needed to avoid error
-let g:NERDTreeExtensionHighlightColor = {} 
-" " Sets the color of css files to blue
-let g:NERDTreeExtensionHighlightColor['css'] = s:blue 
-" " This line is needed to avoid error
-let g:NERDTreeExactMatchHighlightColor = {} 
-" " Sets the color for .gitignore files
-let g:NERDTreeExactMatchHighlightColor['.gitignore'] = s:git_orange 
-" " This line is needed to avoid error
-let g:NERDTreePatternMatchHighlightColor = {} 
-" " Sets the color for files ending with _spec.rb
-let g:NERDTreePatternMatchHighlightColor['.*_spec\.rb$'] = s:rspec_red 
-" " Sets the color for folders that did not match any rule
-let g:WebDevIconsDefaultFolderSymbolColor = s:beige 
-" " Sets the color for files that did not match any rule
-let g:WebDevIconsDefaultFileSymbolColor = s:blue 
-
-" NERDTree Git Plugin
-let g:NERDTreeIndicatorMapCustom = {
-    \ "Modified"  : "✹",
-    \ "Staged"    : "✚",
-    \ "Untracked" : "✭",
-    \ "Renamed"   : "➜",
-    \ "Unmerged"  : "═",
-    \ "Deleted"   : "✖",
-    \ "Dirty"     : "✗",
-    \ "Clean"     : "✔︎",
-    \ 'Ignored'   : '☒',
-    \ "Unknown"   : "?"
-    \ }
-
+" Window resizing with arrow keys
+nnoremap <silent> <Up> :resize +2<CR>
+nnoremap <silent> <Down> :resize -2<CR>
+" inoremap <Up> <ESC>:resize +2<CR>li
 
 " FZF
-nnoremap <C-p> :GFiles<CR>
-let g:fzf_action = {
-  \ 'ctrl-t': 'tab split',
-  \ 'ctrl-s': 'split',
-  \ 'ctrl-v': 'vsplit'
-  \}
+nnoremap <silent> <Leader><Space> :Files<CR>
+nnoremap <silent> <Leader>. :Files <C-r>=expand("%:h")<CR>/<CR>
+nnoremap <silent> gB :Buffers<CR>
+nnoremap <silent> <Leader>g :GFiles?
 
+" let g:fzf_commits_log_options = '--graph --color=always
+"   \ --format="%C(yellow)%h%C(red)%d%C(reset)
+"   \ - %C(bold green)(%ar)%C(reset) %s %C(blue)<%an>%C(reset)"'
 
-" ALE (Asynchronous Lint Engine)
-let g:ale_fixers = {
- \ 'javascript': ['eslint']
- \ }
-let g:ale_sign_error = '❌'
-let g:ale_sign_warning = '⚠️'
-let g:ale_fix_on_save = 1
+" nnoremap <silent> <Leader>c  :Commits<CR>
+" nnoremap <silent> <Leader>bc :BCommits<CR>
 
-set autochdir
+nnoremap <Leader>rg :Rg<Space>
+nnoremap <Leader>RG :Rg!<Space>
+
+" Ignorecase for searches
+set ignorecase smartcase
+
+" Cleaner status line
+let g:airline_section_x = ''
+let g:airline_section_y = ''
+let g:airline_section_z = ''
+" let g:airline_section_warning = ''
+let g:airline#extensions#whitespace#enabled = 0
+let g:airline#extensions#clock#format = '%A, %-d %B %-I:%M %p'
+
+" Disable auto scroll when typing in insert mode
+set nofoldenable
+
+" Disable automatic comment insertion
+autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
